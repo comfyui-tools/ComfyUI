@@ -208,6 +208,9 @@ class ComfyApi extends EventTarget {
 			body.number = number;
 		}
 
+		console.log("QueuePrompt")
+		console.log(JSON.stringify(body))
+
 		const res = await this.fetchApi("/prompt", {
 			method: "POST",
 			headers: {
