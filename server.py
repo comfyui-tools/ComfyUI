@@ -196,6 +196,72 @@ class PromptServer():
             else:
                 return web.Response(status=400)
 
+
+        # Form data instead JSON!
+        @routes.post("/delete/image")
+        async def delete_image(request):
+            try:
+                data = await request.post()  # Parse the POST request data
+                filename = data.get('filename')  # Get the filename from the request data
+
+                if not filename:
+                    return web.json_response({"error": "Filename not provided"}, status=400)
+
+                dir_type = data.get('type')  # Get the directory type from the request data
+
+                # Retrieve the upload directory based on the directory type
+                upload_dir, _ = get_dir_by_type(dir_type)
+
+                # Construct the full filepath
+                filepath = os.path.join(upload_dir, filename)
+
+                # Check if the file exists before attempting to delete
+                if os.path.exists(filepath):
+                    os.remove(filepath)  # Delete the file
+
+                    return web.json_response({"message": f"File '{filename}' deleted successfully"})
+
+                else:
+                    return web.json_response({"error": f"File '{filename}' not found"}, status=404)
+
+            except Exception as e:
+                return web.json_response({"error": str(e)}, status=500)
+
+
+        # Form data instead JSON!
+        @routes.post("/cleanup/image")
+        async def delete_files(request):
+            try:
+                data = await request.post()  # Parse the POST request data
+                dir_type = data.get('type')  # Get the directory type from the request data
+
+                # Required dir_type, because input would take precedence normally
+                if not dir_type:
+                    return web.json_response({"error": "Directory type not provided"}, status=400)
+
+                directory, _ = get_dir_by_type(dir_type)
+                if not directory:
+                    return web.json_response({"error": f"Invalid directory type: {dir_type}"}, status=400)
+
+                # List all files in the specified directory
+                files = os.listdir(directory)
+
+                # Iterate over files and delete PNG and JPG files
+                deleted_files = []
+                for file_name in files:
+                    if file_name.lower().endswith(('.png', '.jpg')):
+                        file_path = os.path.join(directory, file_name)
+                        os.remove(file_path)  # Delete the file
+                        deleted_files.append(file_name)
+
+                return web.json_response(
+                    {"message": f"Deleted {len(deleted_files)} files", "deleted_files": deleted_files})
+
+            except Exception as e:
+                return web.json_response({"error": str(e)}, status=500)
+
+
+        # Form data instead JSON!
         @routes.post("/upload/image")
         async def upload_image(request):
             post = await request.post()
