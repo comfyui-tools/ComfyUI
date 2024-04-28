@@ -620,10 +620,6 @@ def full_type_name(klass):
     return module + '.' + klass.__qualname__
 
 def validate_prompt(prompt):
-    print("=== Prompt BEGIN ===")
-    print(prompt)
-    print("=== Prompt END   ===")
-
     outputs = set()
     for x in prompt:
         class_ = nodes.NODE_CLASS_MAPPINGS[prompt[x]['class_type']]
